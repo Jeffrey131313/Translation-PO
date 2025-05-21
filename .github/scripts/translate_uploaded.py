@@ -16,7 +16,13 @@ def translate_batch(texts):
     input_data = {f"line_{i}": text for i, text in enumerate(texts)}
 
     prompt = textwrap.dedent(f"""\ 
-        不要思考: Please translate the following English strings into Simplified Chinese and respond only in JSON format. Do not return the original text or English that is similar in meaning; all must be translated into Simplified Chinese.
+        请勿进行思考，直接翻译以下英文字符串为**简体中文**，并且仅以**JSON格式**返回结果。
+
+        ⚠️ 注意事项：
+        - 所有内容必须翻译为简体中文，**不得保留英文原文**，也**不得返回与原文意思相近的英文**。
+        - 所有文本均为一款**科幻题材的电子游戏**中的界面文本或游戏内提示，请保持科幻氛围。
+        - 输出必须是一个 JSON 对象，每一项对应翻译结果，不要包含额外说明或格式之外的内容。
+        
         Input:
         {json.dumps(input_data, ensure_ascii=False, indent=2)}
 
