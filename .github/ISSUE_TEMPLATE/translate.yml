@@ -1,0 +1,18 @@
+name: 上传翻译文件 / Upload Translation Files
+description: 上传 .po 文件进行简体中文自动翻译 / Upload .po files for Simplified Chinese auto-translation
+title: "[上传翻译] 自动翻译 .po 文件 / Auto Translate .po Files"
+labels: ["翻译", "translation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请上传你需要翻译的 `.po` 文件作为附件（拖动或选择上传）。  
+        Please upload your `.po` files as attachments (drag & drop or select to upload).
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 提交确认 / Confirmation
+      options:
+        - label: 我确认上传的是 `.po` 文件 / I confirm I am uploading `.po` files
+          required: true
