@@ -36,5 +36,5 @@ if __name__ == "__main__":
         print("No file links found in issue body.")
         sys.exit(1)
 
-    download_files(urls, "downloaded_files")
+    download_files(urls, "uploaded")
     print(f"Downloaded {len(urls)} files.")
