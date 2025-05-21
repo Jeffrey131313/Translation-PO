@@ -36,7 +36,7 @@ jobs:
           python .github/scripts/translate_uploaded.py downloaded_files
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: translated-files
           path: downloaded_files/*.po
