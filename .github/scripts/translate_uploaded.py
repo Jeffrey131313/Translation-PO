@@ -16,7 +16,7 @@ def translate_batch(texts):
     input_data = {f"line_{i}": text for i, text in enumerate(texts)}
 
     prompt = textwrap.dedent(f"""\ 
-        不要思考: Please translate the following English strings into Simplified Chinese, and respond only in JSON format.
+        不要思考: Please translate the following English strings into Simplified Chinese and respond only in JSON format. Do not return the original text or English that is similar in meaning; all must be translated into Simplified Chinese.
         Input:
         {json.dumps(input_data, ensure_ascii=False, indent=2)}
 
