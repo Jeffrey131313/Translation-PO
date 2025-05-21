@@ -25,7 +25,7 @@ jobs:
 
       - name: Extract and download files from issue body
         env:
-          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_BODY: ${{ github.event.comment.body }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           python .github/scripts/download_attachments.py
