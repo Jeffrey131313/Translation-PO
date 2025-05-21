@@ -4,7 +4,7 @@ import requests
 import sys
 
 def extract_urls(text):
-    pattern = r'https://github\.com/user-attachments/files/[^\s]+'
+    pattern = r'https://github\.com/user-attachments/files/[^\s\)]+'
     return re.findall(pattern, text)
 
 def download_files(urls, download_dir):
