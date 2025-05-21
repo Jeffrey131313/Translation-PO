@@ -44,6 +44,7 @@ def translate_batch(texts):
         return texts
 
 input_dir = "uploaded"
+print(os.listdir(input_dir))
 for file in os.listdir(input_dir):
     if file.endswith(".txt"):
         path = os.path.join(input_dir, file)
