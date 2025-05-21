@@ -23,6 +23,10 @@ if __name__ == "__main__":
     issue_body = os.environ.get("ISSUE_BODY")
     issue_number = os.environ.get("ISSUE_NUMBER")
 
+    print("===== ISSUE BODY START =====")
+    print(issue_body)
+    print("===== ISSUE BODY END =====")
+
     if not issue_body or not issue_number:
         print("Missing issue body or number.")
         sys.exit(1)
