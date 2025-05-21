@@ -1,8 +1,8 @@
 import os
 import polib
-from openai import OpenAI
 import json
 import textwrap
+from openai import OpenAI
 
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
@@ -12,17 +12,36 @@ client = OpenAI(
 MODEL = "Qwen/Qwen3-235B-A22B"
 BATCH_SIZE = 10
 
+def escape_placeholders(text):
+    return (
+        text.replace('\\', '\\\\')
+        .replace('\n', '\\n')
+        .replace('\t', '\\t')
+        .replace('"', '\\"')
+    )
+
+def unescape_placeholders(text):
+    return (
+        text.replace('\\n', '\n')
+        .replace('\\t', '\t')
+        .replace('\\"', '"')
+        .replace('\\\\', '\\')
+    )
+
+
 def translate_batch(texts):
-    input_data = {f"line_{i}": text for i, text in enumerate(texts)}
+    escaped_texts = [escape_placeholders(text) for text in texts]
+    input_data = {f"line_{i}": text for i, text in enumerate(escaped_texts)}
 
     prompt = textwrap.dedent(f"""\ 
         请勿进行思考，直接翻译以下英文字符串为**简体中文**，并且仅以**JSON格式**返回结果。
 
         ⚠️ 注意事项：
         - 所有内容必须翻译为简体中文，**不得保留英文原文**，也**不得返回与原文意思相近的英文**。
+        - 不要翻译或更改任何格式标记（如 \\n、\\t、\\\"、\\ 等），请原样保留。
         - 所有文本均为一款**科幻题材的电子游戏**中的界面文本或游戏内提示，请保持科幻氛围。
         - 输出必须是一个 JSON 对象，每一项对应翻译结果，不要包含额外说明或格式之外的内容。
-        
+
         Input:
         {json.dumps(input_data, ensure_ascii=False, indent=2)}
 
@@ -44,13 +63,15 @@ def translate_batch(texts):
             response_format={"type": "json_object"}
         )
         result = json.loads(response.choices[0].message.content)
-        return [result.get(f"line_{i}", texts[i]) for i in range(len(texts))]
+        return [unescape_placeholders(result.get(f"line_{i}", texts[i])) for i in range(len(texts))]
     except Exception as e:
         print("Translation error:", e)
         return texts
 
+
 input_dir = "uploaded"
 print(os.listdir(input_dir))
+
 for file in os.listdir(input_dir):
     if file.endswith(".txt"):
         path = os.path.join(input_dir, file)
@@ -64,7 +85,7 @@ for file in os.listdir(input_dir):
 
             for e, t in zip(batch, translations):
                 e.msgstr = t
-                print(f"{e.msgid} => {t}")
+                print(f"{repr(e.msgid)} => {t}")
 
         po.save(path)
         print(f"✔ Saved translated file: {path}")
