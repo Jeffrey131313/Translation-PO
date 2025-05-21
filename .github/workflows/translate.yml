@@ -1,54 +1,48 @@
-name: Translate Uploaded PO Files
+name: Translate Uploaded Files
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
 
 jobs:
-  translate-uploaded:
-    if: contains(github.event.issue.body, 'user-images.githubusercontent.com')
+  translate:
     runs-on: ubuntu-latest
 
     permissions:
       issues: write
-      contents: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: '3.11'
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install requests polib openai
 
-      - name: Create upload folder
-        run: mkdir uploaded
-
-      - name: Download attachments from issue
+      - name: Extract and download files from issue body
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python .github/scripts/download_attachments.py "${{ github.event.issue.number }}"
+          python .github/scripts/download_attachments.py ${{ github.event.issue.body }} ${{ github.event.issue.number }}
 
-      - name: Translate PO files
+      - name: Translate files
         env:
           OPENAI_API_KEY: ${{ secrets.SILICON_API_KEY }}
         run: |
-          python .github/scripts/translate_uploaded.py uploaded
+          python .github/scripts/translate_uploaded.py downloaded_files
 
-      - name: Upload translated files as artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: translated-po-files
-          path: uploaded/*.po
+          name: translated-files
+          path: downloaded_files/*.po
 
-      - name: Comment back
+      - name: Comment on issue with result
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh issue comment ${{ github.event.issue.number }} --body "Translate Complete"
+          python .github/scripts/comment_result.py ${{ github.event.issue.number }}
