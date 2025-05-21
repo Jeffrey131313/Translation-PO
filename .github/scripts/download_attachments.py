@@ -1,7 +1,7 @@
-import sys
 import os
 import re
 import requests
+import sys
 
 def extract_urls(text):
     pattern = r'https://user-images\.githubusercontent\.com[^\s]+'
@@ -20,8 +20,12 @@ def download_files(urls, download_dir):
             print(f"Failed to download {url}")
 
 if __name__ == "__main__":
-    issue_body = sys.argv[1]
-    issue_number = sys.argv[2]
+    issue_body = os.environ.get("ISSUE_BODY")
+    issue_number = os.environ.get("ISSUE_NUMBER")
+
+    if not issue_body or not issue_number:
+        print("Missing issue body or number.")
+        sys.exit(1)
 
     urls = extract_urls(issue_body)
     if not urls:
