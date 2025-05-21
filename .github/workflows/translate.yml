@@ -34,16 +34,10 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.SILICON_API_KEY }}
         run: |
-          python .github/scripts/translate_uploaded.py downloaded_files
+          python .github/scripts/translate_uploaded.py
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: translated-files
           path: downloaded_files/*.po
-
-      - name: Comment on issue with result
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python .github/scripts/comment_result.py ${{ github.event.issue.number }}

@@ -45,7 +45,7 @@ def translate_batch(texts):
 
 input_dir = "uploaded"
 for file in os.listdir(input_dir):
-    if file.endswith(".po"):
+    if file.endswith(".txt"):
         path = os.path.join(input_dir, file)
         po = polib.pofile(path)
         entries = [e for e in po if e.msgid and not e.msgstr]
