@@ -42,7 +42,7 @@ def translate_batch(texts):
         - 所有文本均为一款科幻题材的电子游戏中的界面文本或游戏内提示，请保持科幻氛围。
         - 输出必须是一个 JSON 对象，每一项对应翻译结果，不要包含额外说明或格式之外的内容。
 
-        Input:s
+        Input:
         {json.dumps(input_data, ensure_ascii=False, indent=2)}
 
         Output format:
