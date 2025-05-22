@@ -21,7 +21,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests polib openai
+        run: pip install requests polib openai googletrans
 
       - name: Extract and download files from issue body
         env:
