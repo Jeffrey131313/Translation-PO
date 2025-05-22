@@ -6,8 +6,8 @@ import difflib
 import time
 from openai import OpenAI
 from googletrans import Translator
+import re
 
-# 初始化翻译器
 translator = Translator()
 
 client = OpenAI(
@@ -38,11 +38,14 @@ def unescape_placeholders(text):
 def is_too_similar(a, b, threshold=0.95):
     return difflib.SequenceMatcher(None, a, b).ratio() >= threshold
 
+def is_meaningful_text(text):
+    return bool(re.search(r'[a-zA-Z]', text)) and len(text.strip()) > 1
+
 def call_translate_api(text_dict):
     prompt = textwrap.dedent(f"""\ 
         请勿进行思考，直接翻译以下英文字符串为**简体中文**，并且仅以**JSON格式**返回结果。
 
-          注意事项：
+        ⚠️ 注意事项：
         - 所有内容必须翻译为简体中文，不得保留英文原文，也不得返回与原文意思相近的英文。
         - 不要翻译或更改任何格式标记（如 \\n、\\t、\\\"、\\ 等），请原样保留。
         - 所有文本均为一款科幻题材的电子游戏中的界面文本或游戏内提示，请保持科幻氛围。
@@ -75,6 +78,9 @@ def call_translate_api(text_dict):
     return json.loads(response.choices[0].message.content)
 
 def google_translate(text):
+    if not is_meaningful_text(text):
+        print(f"🚫 内容过短或为符号/数字，跳过翻译：{text}")
+        return text
     try:
         result = translator.translate(text, src='en', dest='zh-cn')
         return result.text
@@ -95,31 +101,32 @@ def translate_batch_with_retry(texts):
             raw_result = call_translate_api(batch_input)
         except Exception as e:
             print("⚠️ 翻译 API 调用失败:", e)
-            return texts  # 出错时返回原文
+            return texts
 
         new_remaining = []
         for idx in remaining_indexes:
-            translated = unescape_placeholders(raw_result.get(f"line_{idx}", texts[idx]))
-            if is_too_similar(texts[idx], translated):
-                print(f"⚠️ 与原文过于相似，将重试：{texts[idx]}")
+            original = texts[idx]
+            translated = unescape_placeholders(raw_result.get(f"line_{idx}", original))
+
+            if is_too_similar(original, translated):
+                print(f"⚠️ 与原文过于相似，将重试：{original}")
                 new_remaining.append(idx)
             else:
                 results[idx] = translated
-                print(f"✅ 翻译成功：{repr(texts[idx])} => {translated}")
+                print(f"✅ 翻译成功：'{original}' => {translated}")
 
         remaining_indexes = new_remaining
         retries += 1
         if remaining_indexes:
             time.sleep(1)
 
-    # 最终失败的使用 Google 翻译
     for idx in remaining_indexes:
-        fallback = google_translate(texts[idx])
+        original = texts[idx]
+        fallback = google_translate(original)
         results[idx] = fallback
-        print(f"🔁 使用 Google 翻译：{texts[idx]} => {fallback}")
+        print(f"🔁 使用 Google 翻译：{original} => {fallback}")
 
     return results
-
 
 input_dir = "uploaded"
 print("📂 读取目录：", input_dir)
